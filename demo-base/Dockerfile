@@ -21,19 +21,14 @@ ENV HOMEDIR=/$USER
 ENV USER_ID=1024
 ENV GROUP_ID=1024
 
-RUN mkdir -p ${HOMEDIR}
-
-WORKDIR /${HOMEDIR}
-
 # install necessities
 RUN apt-get update ; \
-    apt-get install -y sudo openssh-server wget curl nano iproute2 tmux vim;
+    apt-get install -y sudo wget curl openssh-server nano vim iproute2 nmap tmux;
 
 # set up user
 RUN groupadd --gid ${GROUP_ID} ${USER} ; \
     useradd --system --shell /bin/bash --home ${HOMEDIR} --uid ${USER_ID} --gid ${GROUP_ID} ${USER} ; \
-    usermod -aG sudo ${USER} ; \
-    chown -R ${USER}:${USER} ${HOMEDIR} ;
+    usermod -aG sudo ${USER} ;
 
 # set up other files/folders
 RUN mkdir -p /run/sshd ${HOMEDIR}/.atsign/keys ${HOMEDIR}/.sshnp ${HOMEDIR}/.ssh ; \
@@ -43,9 +38,17 @@ RUN mkdir -p /run/sshd ${HOMEDIR}/.atsign/keys ${HOMEDIR}/.sshnp ${HOMEDIR}/.ssh
 # disable sudo password, requires vim
 RUN ex +"%s/^%sudo.*$/%sudo ALL=(ALL:ALL) NOPASSWD:ALL/g" -scwq! /etc/sudoers ;
 
+# "PasswordAuthentication no" in /etc/ssh/sshd_config
+RUN sed -E -i 's|^#?(PasswordAuthentication)\s.*|\1 no|' /etc/ssh/sshd_config
+
+# "ListenAddress 127.0.0.1" in /etc/ssh/sshd_config
+RUN sed -i 's/#ListenAddress 0.0.0.0/ListenAddress 127.0.0.1/g' /etc/ssh/sshd_config
+
 # copy binaries from buildimage
 RUN mkdir -p ${HOMEDIR}/.local/bin ;
 COPY --from=buildimage --chown=${USER}:${USER} /app/bin/* ${HOMEDIR}/.local/bin
+
+WORKDIR ${HOMEDIR}
 
 # RUN echo '${USER}:123' | sudo chpasswd 
 USER ${USER}
