@@ -28,7 +28,7 @@ WORKDIR /${HOMEDIR}
 
 # install necessities
 RUN apt-get update ; \
-    apt-get install -y sudo openssh-server wget curl nano iproute2;
+    apt-get install -y sudo openssh-server wget curl nano iproute2 tmux vim;
 
 # set up user
 RUN groupadd --gid ${GROUP_ID} ${USER} ; \
@@ -41,9 +41,8 @@ RUN mkdir -p /run/sshd ${HOMEDIR}/.atsign/keys ${HOMEDIR}/.sshnp ${HOMEDIR}/.ssh
     touch ${HOMEDIR}/.ssh/authorized_keys ; \
     chown -R ${USER}:${USER} ${HOMEDIR} ;
 
-# disable sudo password
-RUN apt-get install -y vim ; \
-    ex +"%s/^%sudo.*$/%sudo ALL=(ALL:ALL) NOPASSWD:ALL/g" -scwq! /etc/sudoers ;
+# disable sudo password, requires vim
+RUN ex +"%s/^%sudo.*$/%sudo ALL=(ALL:ALL) NOPASSWD:ALL/g" -scwq! /etc/sudoers ;
 
 # copy binaries from buildimage
 RUN mkdir -p ${HOMEDIR}/.local/bin ;
