@@ -16,7 +16,6 @@ RUN dart compile exe /app/repo/bin/activate_cli.dart -o /app/bin/at_activate
 
 FROM ubuntu:latest
 
-
 ENV USER=atsign
 ENV HOMEDIR=/$USER
 ENV USER_ID=1024
