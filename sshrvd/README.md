@@ -12,4 +12,4 @@ Version : 3.1.2
 FormatException: Option atsign is mandatory.
 ```
 
-`./sshrvd -a @48leo -i 172.17.0.2 -v -s`
+`./sshrvd -a @48leo -i $(hostname -i) -v -s`

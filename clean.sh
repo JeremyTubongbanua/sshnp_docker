@@ -6,10 +6,15 @@ sudo docker stop jeremy_sshnpd
 sudo docker container rm jeremy_sshnpd
 sudo docker image rm jeremy_sshnpd
 
+sudo docker stop jeremy_sshrvd
+sudo docker container rm jeremy_sshrvd
+sudo docker image rm jeremy_sshrvd
+
 sudo docker image rm jeremy_demo-base
 
 sudo docker network rm jeremy_sshnp
 sudo docker network rm jeremy_sshnpd
+sudo docker network rm jeremy_sshrvd
 
 sudo docker container prune -f
 sudo docker image prune -f
