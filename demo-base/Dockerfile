@@ -8,17 +8,16 @@ RUN apt-get update
 RUN apt-get install -y git
 RUN git clone https://github.com/atsign-foundation/sshnoports repo
 
-RUN cd repo ; dart pub get
-# RUN cd repo ; git fetch origin ; git checkout origin/gkc-refactor-sshnp ; dart pub get
+RUN cd repo ; git fetch origin  ; git checkout origin/trunk ; dart pub get ; \
+# RUN cd repo ; git fetch origin ; git checkout origin/gkc-refactor-sshnp ; dart pub get ; \
+    dart compile exe /app/repo/bin/sshnp.dart -o /app/bin/sshnp ; \
+    dart compile exe /app/repo/bin/sshrv.dart -o /app/bin/sshrv ; \
+    dart compile exe /app/repo/bin/sshnpd.dart -o /app/bin/sshnpd ; \
+    dart compile exe /app/repo/bin/sshrvd.dart -o /app/bin/sshrvd ; \
+    dart compile exe /app/repo/bin/activate_cli.dart -o /app/bin/at_activate ; 
 
-RUN dart compile exe /app/repo/bin/sshnp.dart -o /app/bin/sshnp
-RUN dart compile exe /app/repo/bin/sshrv.dart -o /app/bin/sshrv
-RUN dart compile exe /app/repo/bin/sshnpd.dart -o /app/bin/sshnpd
-RUN dart compile exe /app/repo/bin/sshrvd.dart -o /app/bin/sshrvd
-RUN dart compile exe /app/repo/bin/activate_cli.dart -o /app/bin/at_activate
-
-# FROM ubuntu:latest
-FROM dart:latest
+FROM ubuntu:latest
+# FROM dart:latest
 
 ENV USER=atsign
 ENV HOMEDIR=/$USER
@@ -57,7 +56,6 @@ WORKDIR ${HOMEDIR}
 # RUN echo '${USER}:123' | sudo chpasswd 
     
 USER ${USER}
-
 
 ENTRYPOINT sudo service ssh start && bash
 
