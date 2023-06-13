@@ -1,15 +1,26 @@
 FROM dart:latest AS buildimage
 
-RUN mkdir -p /app/bin
-
-WORKDIR /app
+RUN mkdir -p /app/bin /app/binrefactor /app/repo
 
 RUN apt-get update
 RUN apt-get install -y git
-RUN git clone https://github.com/atsign-foundation/sshnoports repo
 
-RUN cd repo ; git fetch origin  ; git checkout origin/trunk ; dart pub get ; \
-# RUN cd repo ; git fetch origin ; git checkout origin/gkc-refactor-sshnp ; dart pub get ; \
+WORKDIR /app/repo 
+
+RUN git clone https://github.com/atsign-foundation/sshnoports .
+
+RUN git fetch origin ; \
+    git checkout gkc-refactor-sshnp ; \
+    dart pub get ; \
+    dart compile exe /app/repo/bin/sshnp.dart -o /app/binrefactor/sshnp ; \
+    dart compile exe /app/repo/bin/sshrv.dart -o /app/binrefactor/sshrv ; \
+    dart compile exe /app/repo/bin/sshnpd.dart -o /app/binrefactor/sshnpd ; \
+    dart compile exe /app/repo/bin/sshrvd.dart -o /app/binrefactor/sshrvd ; \
+    dart compile exe /app/repo/bin/activate_cli.dart -o /app/binrefactor/at_activate ; 
+
+RUN git fetch origin ; \
+    git checkout trunk ; \
+    dart pub get ; \
     dart compile exe /app/repo/bin/sshnp.dart -o /app/bin/sshnp ; \
     dart compile exe /app/repo/bin/sshrv.dart -o /app/bin/sshrv ; \
     dart compile exe /app/repo/bin/sshnpd.dart -o /app/bin/sshnpd ; \
@@ -48,8 +59,9 @@ RUN sed -E -i 's|^#?(PasswordAuthentication)\s.*|\1 no|' /etc/ssh/sshd_config
 RUN sed -i 's/#ListenAddress 0.0.0.0/ListenAddress 127.0.0.1/g' /etc/ssh/sshd_config
 
 # copy binaries from buildimage
-RUN mkdir -p ${HOMEDIR}/.local/bin  ${HOMEDIR}/repo ;
+RUN mkdir -p ${HOMEDIR}/.local/bin ${HOMEDIR}/.local/binrefactor ${HOMEDIR}/repo ;
 COPY --from=buildimage --chown=${USER}:${USER} /app/bin/* ${HOMEDIR}/.local/bin
+COPY --from=buildimage --chown=${USER}:${USER} /app/binrefactor/* ${HOMEDIR}/.local/binrefactor
 
 WORKDIR ${HOMEDIR}
 
